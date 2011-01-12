@@ -1,0 +1,19 @@
+brassQuintetFeatures.mat
+
+is a single matrix with the following structure
+
+trumpet
+trumpet
+french horn
+trombone
+tuba
+
+4-octaves each, 12 notes (each half note) per instrument
+
+32000 samples at 48000Hz for each note
+
+so the matrix has
+
+5 (instruments) * 4 (octaves) * 12 (notes) rows
+and
+32000 (samples) columns
