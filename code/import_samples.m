@@ -35,7 +35,7 @@ waveform = cell(4,12,4);
 fs = zeros(4,12,4);
 
 % a a# b c c# d d# e f f# g g#
-% 1 2  3 4 5  6  7 8 9 10 11 12
+% 10 11 12 1 2  3 4  5 6  7 8  9 
 %
 % trumpet = 1
 % french horn = 2
@@ -101,7 +101,6 @@ for i = 1:length(fileDetails)
     % fs(instrument,noteIndex,relativeOctave)]
      [Y ns] = mp3read([projectBaseDir 'samples/mp3s/' fileDetails{i,1} '/' fileDetails{i,2} '-' fileDetails{i,3} '-' fileDetails{i,4} '-' fileDetails{i,3} '.mp3']);
     waveforms{instrument,noteIndex,relativeOctave} = mean(Y,2);
-    waveforms{instrument,noteIndex,relativeOctave} = waveforms{instrument,noteIndex,relativeOctave}(1:ns);
     fs(instrument,noteIndex,relativeOctave) = ns;
 end
 
@@ -127,6 +126,11 @@ for instrument = 1:4
                 firstNoteIndex=k;
             end
         end
+        
+        for l = 1:12
+                waveforms{instrument,l,octave} = waveforms{instrument,l,octave}(1:32000);
+        end
+
     end
 end
 
@@ -135,6 +139,22 @@ for instrument = 3
     for octave = 1:4
         for note = 1:12
             sound(waveforms{instrument,note,octave},fs(instrument,noteIndex,relativeOctave));
+        endbrassQuintetFeatures
+    end
+end
+
+%% flatten matrix 
+
+brassQuintetFeatures = zeros(5*12*4,32000);
+
+instrumentation = [1 1 2 3 4];
+for v=1:5 % voice
+    i = instrumentation(v); %instrument
+    for o = 1:4 % octave
+        for n = 1:12 %note
+            brassQuintetFeatures((v-1)*(12*4)+(o-1)*12+n,:) = waveforms{i,n,o}';
         end
     end
 end
+
+save([projectBaseDir 'data/brassQuintetFeatures.mat'],'brassQuintetFeatures');
