@@ -1,9 +1,9 @@
-function [spectra times sr] = mp3_to_spectra(file,unit)
-% Given path to mp3 ('file') reads in the waveform, finds the beats, and
-% takes the spectrum within each beat, returning a cell array of spectra.
+function [spectra times sr] = mp3_to_spectra(file,window)
+% Given path to mp3 ('file') converts the sound to a spectrogram and
+% returns a map from beats to spectrogram time bins
 %
 % file - path to mp3
-% unit - The smallest fraction of a beat we consider (eg 4 -> 16th notes)
+% window - width of a spectrogram time bin (with Hamming window)
 %
 % spectra - the spectrogram of the signal
 % times - the length of each bin, in seconds
@@ -13,16 +13,11 @@ function [spectra times sr] = mp3_to_spectra(file,unit)
 % Using many functions by Dan Ellis et al, labrosa.ee.columbia.edu
 
 if nargin == 1
-    unit = 1;
+    window = 4096;
 end
 
 [wv,sr] = mp3read(file);
 wv = sum(wv,2)/size(wv,2);
-beats = beat(wv,sr);
-times = zeros(unit*length(beats),1);
-beats = [beats length(wv)/sr]; % add length of track to end
-for i = 1:length(beats)-1
-    times(unit*(i-1)+1:unit*i-1) = floor((beats(i+1)-beats(i))/unit);
-    times(unit*i) = beats(i+1)-beats(i)-sum(times(unit*(i-1)+1:unit*i-1)); % this way there's no rounding error
-end
-spectra = spectrogram(wv,times);
+spectra = abs(spectrogram(wv,window));
+
+times = ceil(2*sr*beat(wv,sr)/window);
