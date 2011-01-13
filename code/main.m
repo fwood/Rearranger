@@ -10,7 +10,7 @@ global V;
 samples_to_spectra
 
 %% get the spectrogram of fat bottomed girls
-A = abs(spectrogram(fatBottomedGirls(1*ns:2*ns),winsize));
+A = abs(spectrogram(fatBottomedGirls(1*ns:3*ns),winsize));
 %imagesc(abs(A).^(2/5))
 %set(gca,'YDir','normal')
 
@@ -40,9 +40,9 @@ end
 
 % H = V*(D.*S);
 % A = brassSpectra * H;
-D = ones(size(V,2),B);
-S = zeros(size(V,2),B);
-S(N:N:size(S,1),:) = 1;
+D = rand(size(V,2),B);
+S = rand(size(V,2),B);
+% S(N:N:size(S,1),:) = 1;
 
 delta = 1;
 midNotePotential = repmat([ abs(linspace(-1,1,N-1)) delta]',K,B);
@@ -70,6 +70,10 @@ config = optimset(config, 'MaxIter', 500);
 %config = optimset(config, 'TolFun', options.getFunctionTolerance());
 config = optimset(config, 'TolCon', .01);
 %config = optimset(config, 'TolX', options.getParameterTolerance());
+config = optimset(config, 'TolX', 1e-10);
+config = optimset(config, 'GradObj', 'on');
+% config = optimset(config, 'DerivativeCheck', 'on');
+config = optimset(config, 'Hessian','lbfgs');
 
 %initParams = zeros(numel(S)+numel(D),1);
 initParams = [reshape(S,numel(S),1); reshape(D,numel(D),1)];

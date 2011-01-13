@@ -22,7 +22,9 @@ for t = 1:size(A,2)
     recon = [recon R(1:(end/2))];
 end
 
-soundsc(recon,ns)
+if (mod(optimValues.funccount, 10) == 0)
+    soundsc(recon,ns)
+end
 
 
 %figure(1)
