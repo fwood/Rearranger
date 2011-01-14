@@ -15,14 +15,25 @@ d = s;
 
 e = ones(1,size(a,2)); % for now, either sample or integrate out later
 
-function aux = sample_aux(a,e,s,v,d)
+s = rand(size(s)) > 0.5;
+d = gamrnd(1,1,size(d));
+
+aux = sample_aux(a,e,s,v,d);
+
+function d_new = sample_d(aux,s,v)
 
 k = size(v,2);
 
-prob = cat(3,ones(size(a,1),1)*e, zeros(size(a,1),size(a,2),k));
-for i = 1:k
-    prob(:,:,i+1) = v(:,k)*(s(k,:).*d(k,:));
-end
-cumprob = cumsum(prob,3)./repmat(sum(prob,3),[1 1 k]);
+function aux = sample_aux(a,e,s,v,d)
 
-aux = mnrnd(a(:),reshape(permute(cumprob,[3 2 1]),k,numel(a)));
+k = size(v,2);
+m = size(a,1);
+n = size(a,2);
+
+prob = cat(3,ones(m,1)*e, zeros(m,n,k));
+for i = 1:k
+    prob(:,:,i+1) = v(:,i)*(s(i,:).*d(i,:));
+end
+cumprob = cumsum(prob,3)./repmat(sum(prob,3),[1 1 k+1]);
+
+aux = mnrnd(a(:),reshape(permute(cumprob,[3 2 1]),k+1,numel(a)));
