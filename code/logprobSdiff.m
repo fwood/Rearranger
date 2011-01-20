@@ -1,4 +1,4 @@
-function [d] = logprobDiff(S,params,inds)
+function [d] = logprobSdiff(S,params,inds)
 
 % pass inds as linear array of indices
 
@@ -40,6 +40,5 @@ s_gamma = gamma*(sum(S(inds)==1) - (sum(S(inds)==0)));
 s_delta = delta*(M_prime(inds).*S(inds) - (M_prime(inds).*(1-S(inds))));
 
 d = s_alpha + s_beta + s_gamma + s_delta;
-% d = [s_alpha, s_beta, s_gamma, s_delta];
 
 end

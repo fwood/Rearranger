@@ -1,4 +1,4 @@
-function [p] = probS(S,params)    
+function [p] = logprobS(S,params)    
     
 getMRFparams();
 
