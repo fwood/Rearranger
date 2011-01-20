@@ -8,7 +8,7 @@ D = reshape(params(((K*N*B)+1):end),K*N,B);
 
 % 
 H = V*(D.*S);
-%residual = (A - brassSpectra * H);
+% residual = A - H
 
 % p(S) parameters:
 % higher alpha => more important to be near the mid range
