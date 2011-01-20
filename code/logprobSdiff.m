@@ -39,7 +39,7 @@ s_beta = s_b1 + s_b2 + s_b3;
 s_gamma = gamma*(sum(S(inds)==1) - (sum(S(inds)==0)));
 s_delta = delta*(M_prime(inds).*S(inds) - (M_prime(inds).*(1-S(inds))));
 
-% d = s_alpha + s_beta + s_gamma + s_delta;
-d = [s_alpha, s_beta, s_gamma, s_delta];
+d = s_alpha + s_beta + s_gamma + s_delta;
+% d = [s_alpha, s_beta, s_gamma, s_delta];
 
 end
