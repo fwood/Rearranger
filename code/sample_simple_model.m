@@ -24,19 +24,15 @@ for i = 1:20
     z = sample_z(a,e,s,v,d);
     d = sample_d(z,s,v,d_hyp);
     disp(['Initializing D: ' num2str(i)])
-    scores = [scores score(a,s,v,d,d_hyp)];
-%     subplot(2,2,1); imagesc(s); title(['Iteration ' num2str(i)])
-%     subplot(2,2,2); imagesc(d)
-%     subplot(2,2,3); imagesc(z); 
-%     subplot(2,2,4); plot(scores); drawnow
 end
 
-for i = 1:1000
+for i = 1:1e6
     [s d] = sample_s(a,e,s,v,d,d_hyp,ceil(numel(s)*rand));
-    scores = [scores score(a,s,v,d,d_hyp)];
-    subplot(2,1,1); imagesc(s); title(['Iteration ' num2str(i)])
-    subplot(2,1,2); plot(scores); drawnow
-    score(a,s,v,d,d_hyp)
+    if mod(i,50)==0
+        scores = [scores score(a,s,v,d,d_hyp)];
+        subplot(1,2,1); imagesc(s); title(['Iteration ' num2str(i)])
+        subplot(1,2,2); plot(scores); drawnow
+    end
 end
 
 function [s_new d_new] = sample_s(a,e,s,v,d,d_hyp,diff)
@@ -50,9 +46,6 @@ for j = 1:length(diff)
             [k b] = ind2sub(size(s),diff(j));
             prob = v(:,k)*s_new(diff)*d_new(diff)./(e(b) + v*(s_new(:,b).*d_new(:,b))); % for all frequencies m, the average fraction of a(m,b) from instrument k
             z = sum(binornd(floor(a(:,b)),prob));
-            if isnan(z)
-                pause(1)
-            end
             d_new(diff) = gamrnd(d_hyp + z, 1./( d_hyp + s_new(diff)*sum(v(:,k))));
         end
     else
