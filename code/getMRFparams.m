@@ -1,10 +1,10 @@
 function [params] = getMRFparams(B)
 
-params.alpha = 1;
-params.beta = 1;
-params.gamma = 1;
+params.alpha = 5;
+params.beta = 2.5;
+params.gamma = -0.5;
 params.delta = 1;
-%
+
 K = 5; % instrument / voice
 N = 12*4+1; % notes (+1 for rest)
 
