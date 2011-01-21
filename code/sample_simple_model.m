@@ -9,25 +9,67 @@ function [s,d] = sample_simple_model(a,v,nBurn,nSamp,nInter)
 % s(k,b) - score of instrument k at beat b
 % d(k,b) - loudness of instrument k at beat b (if s(k,b) is 1)
 
-d_hyp = 1; % d ~ Gamma(d_hyp,d_hyp)
+d_hyp = 2; % d ~ Gamma(d_hyp,d_hyp)
 
 k = size(v,2); % the number of distinct instruments and notes
-m = size(a,1);
 n = size(a,2);
 
-e = ones(1,size(a,2)); % for now, either sample or integrate out later
+e = 0.01*ones(1,size(a,2)); % for now, either sample or integrate out later
 
-s = rand(k,n) > 0.5;
+s = rand(k,n) > 0.1;
 d = gamrnd(d_hyp,1/d_hyp,[k n]);
 
-aux = sample_aux(a,e,s,v,d);
-d = sample_d(aux,s,v,d_hyp);
+scores = [];
+for i = 1:20
+    z = sample_z(a,e,s,v,d);
+    d = sample_d(z,s,v,d_hyp);
+    disp(['Initializing D: ' num2str(i)])
+    scores = [scores score(a,s,v,d,d_hyp)];
+%     subplot(2,2,1); imagesc(s); title(['Iteration ' num2str(i)])
+%     subplot(2,2,2); imagesc(d)
+%     subplot(2,2,3); imagesc(z); 
+%     subplot(2,2,4); plot(scores); drawnow
+end
 
-function d = sample_d(aux,s,v,d_hyp)
+for i = 1:1000
+    [s d] = sample_s(a,e,s,v,d,d_hyp,ceil(numel(s)*rand));
+    scores = [scores score(a,s,v,d,d_hyp)];
+    subplot(2,1,1); imagesc(s); title(['Iteration ' num2str(i)])
+    subplot(2,1,2); plot(scores); drawnow
+    score(a,s,v,d,d_hyp)
+end
 
-d = gamrnd(d_hyp + aux(2:end,:), 1./( d_hyp + diag(sum(v))*s ));
+function [s_new d_new] = sample_s(a,e,s,v,d,d_hyp,diff)
 
-function aux = sample_aux(a,e,s,v,d)
+d_new = d;
+s_new = s;
+s_new(diff) = mod(s(diff)+1,2);
+for j = 1:length(diff)
+    if s_new(diff) == 1
+        for i = 1:10
+            [k b] = ind2sub(size(s),diff(j));
+            prob = v(:,k)*s_new(diff)*d_new(diff)./(e(b) + v*(s_new(:,b).*d_new(:,b))); % for all frequencies m, the average fraction of a(m,b) from instrument k
+            z = sum(binornd(floor(a(:,b)),prob));
+            if isnan(z)
+                pause(1)
+            end
+            d_new(diff) = gamrnd(d_hyp + z, 1./( d_hyp + s_new(diff)*sum(v(:,k))));
+        end
+    else
+        d_new(diff) = gamrnd(d_hyp,d_hyp);
+    end
+end
+
+if score(a,s_new,v,d_new,d_hyp) - score(a,s,v,d,d_hyp) < log(rand)
+    s_new = s;
+    d_new = d;
+end
+
+function d = sample_d(z,s,v,d_hyp)
+
+d = gamrnd(d_hyp + z(2:end,:), 1./( d_hyp + diag(sum(v))*s ));
+
+function z = sample_z(a,e,s,v,d)
 
 k = size(v,2);
 m = size(a,1);
@@ -39,6 +81,21 @@ for i = 1:k
 end
 normprob = prob./repmat(sum(prob,3),[1 1 k+1]);
 
-sum(reshape(permute(normprob,[3 2 1]),k+1,numel(a)),2) % should sum to 1!
-aux = mnrnd(a(:),reshape(permute(normprob,[3 2 1]),k+1,numel(a)));
-aux = squeeze(sum(reshape(aux,[m n k+1])))';
+z = zeros(m,n,k+1);
+for i = 1:n
+    z(:,i,:) = mnrnd(floor(a(:,i)),squeeze(normprob(:,i,:)));
+end
+z = squeeze(sum(z))';
+
+function score = logprobA(a,s,v,d)
+
+h = v*(s.*d);
+score = sum(a(:) .* log(h(:)) - h(:)); % log poisson likelihood
+
+function score = logprobD(d,d_hyp)
+
+score = (d_hyp-1)*sum(log(d(:))) - d_hyp*(sum(d(:))); % log gamma likelihood
+
+function logprob = score(a,s,v,d,d_hyp)
+
+logprob = logprobA(a,s,v,d) + logprobD(d,d_hyp);% + logprobS(s,getMRFparams(size(s,2)));
