@@ -21,3 +21,4 @@ wv = sum(wv,2)/size(wv,2);
 spectra = abs(spectrogram(wv,window));
 
 times = ceil(2*sr*beat(wv,sr)/window);
+times = [times size(spectra,2)];

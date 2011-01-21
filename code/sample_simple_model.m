@@ -16,26 +16,27 @@ n = size(a,2);
 
 e = 0.01*ones(1,size(a,2)); % for now, either sample or integrate out later
 
-s = rand(k,n) > 0.1;
+s = rand(k,n) < 0.1;
 d = gamrnd(d_hyp,1/d_hyp,[k n]);
 
-scores = [];
 for i = 1:20
     z = sample_z(a,e,s,v,d);
     d = sample_d(z,s,v,d_hyp);
     disp(['Initializing D: ' num2str(i)])
 end
+curr_score = score(a,s,v,d,d_hyp);
+scores = [curr_score];
 
 for i = 1:1e6
-    [s d] = sample_s(a,e,s,v,d,d_hyp,ceil(numel(s)*rand));
-    if mod(i,50)==0
-        scores = [scores score(a,s,v,d,d_hyp)];
+    [s d curr_score] = sample_s(a,e,s,v,d,d_hyp,ceil(numel(s)*rand),curr_score);
+    if mod(i,100)==0
+        scores = [scores curr_score];
         subplot(1,2,1); imagesc(s); title(['Iteration ' num2str(i)])
         subplot(1,2,2); plot(scores); drawnow
     end
 end
 
-function [s_new d_new] = sample_s(a,e,s,v,d,d_hyp,diff)
+function [s_new d_new sc_new] = sample_s(a,e,s,v,d,d_hyp,diff,sc)
 
 d_new = d;
 s_new = s;
@@ -53,9 +54,11 @@ for j = 1:length(diff)
     end
 end
 
-if score(a,s_new,v,d_new,d_hyp) - score(a,s,v,d,d_hyp) < log(rand)
+sc_new = score(a,s_new,v,d_new,d_hyp);
+if sc_new - sc < log(rand)
     s_new = s;
     d_new = d;
+    sc_new = sc;
 end
 
 function d = sample_d(z,s,v,d_hyp)
@@ -91,4 +94,4 @@ score = (d_hyp-1)*sum(log(d(:))) - d_hyp*(sum(d(:))); % log gamma likelihood
 
 function logprob = score(a,s,v,d,d_hyp)
 
-logprob = logprobA(a,s,v,d) + logprobD(d,d_hyp);% + logprobS(s,getMRFparams(size(s,2)));
+logprob = logprobA(a,s,v,d) + logprobD(d,d_hyp) + logprobS(s,getMRFparams(size(s,2)));
