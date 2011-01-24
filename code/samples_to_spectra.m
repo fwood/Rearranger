@@ -1,6 +1,6 @@
 load('../data/brassQuintetFeatures.mat');
 
-winsize = 4096;
+winsize = 8192;
 brassSpectra = zeros(size(brassQuintetFeatures, 1), winsize/2+1);
 for i = 1:size(brassQuintetFeatures, 1),
 %     sg = spectrogram(brassQuintetFeatures(i, :), hamming(winsize));

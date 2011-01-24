@@ -1,4 +1,5 @@
 function [d] = logprobSdiff(S,params,inds)
+% function [d] = logprobSdiff(S,params,inds)
 
 % pass inds as linear array of indices
 

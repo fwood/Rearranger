@@ -1,0 +1,136 @@
+\documentclass{article}
+\usepackage{nips10submit_e,times}
+%\documentstyle[nips07submit_09,times]{article}
+\usepackage[square,numbers]{natbib}
+\usepackage{amsmath, epsfig}
+\usepackage{amsfonts}
+\usepackage{subfigure}
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{easybmat}
+\usepackage{footmisc}
+\renewcommand\algorithmiccomment[1]{// \textit{#1}}
+%
+\newcommand{\ignore}[1]{}
+\newcommand{\comment}[1]{}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\title{Bayesian Nonparametric Ontology Learning}
+
+
+\author{
+Nicholas Bartlett \hspace{1cm} Matthew Hoffman \hspace{1cm} Frank Wood\\
+Columbia University, New York, NY 10027, USA \\
+\texttt{\{bartlett, xxx, fwood\}@stat.columbia.edu}
+%\texttt{pfau@neurotheory.columbia.edu} 
+%\texttt{\{bartlett,fwood\}@stat.columbia.edu} 
+}
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to \LaTeX{} to determine where to break
+% the lines. Using \AND forces a linebreak at that point. So, if \LaTeX{}
+% puts 3 of 4 authors names on the first line, and the last on the second
+% line, try using \AND instead of \And before the third author name.
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+\newcommand{\state}{q}
+\newcommand{\symb}{\sigma}
+\newcommand{\bmu}{\boldsymbol\mu}
+\newcommand{\bphi}{\boldsymbol\phi}
+\newcommand{\bpi}{\boldsymbol\pi}
+\newcommand{\PY}{\textrm{PY}}
+\newcommand{\geom}{\textrm{geom}}
+
+\nipsfinalcopy
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+Bayesian nonparametrics rules.
+
+Ontologies rule.
+
+Learning rules.
+
+What could go wrong?
+
+\section{Model Definition}
+
+We begin by assuming that the parameters $\delta$ for $M$
+Probabilistic Deterministic Finite Automata (PDFA) are sampled
+according to the following process:
+\begin{equation}
+\theta_{m,\epsilon} \sim \PY(d^{\delta}_{0},\geom(q)); \quad
+\theta_{m,\sigma_j} \sim \PY(d^{\delta}_{|\sigma_j|},
+\theta_{m,\gamma(\sigma_j)}); \quad
+\delta_{m,\phi_i,\sigma_j} \sim \theta_{m,\sigma_j}.
+\end{equation}
+
+Shared across all of these PDFA is a set of (a countably infinite
+number of) emission distributions $\pi_{\phi_i}$ over binary
+vectors. Each of these distributions generates binary state vectors
+$z$ according to the following process:
+\begin{equation}
+\begin{split}
+\{r_{0,\sigma_j}, l_{0,\sigma_j}, s_{0,\sigma_j}\} &\sim \PY(d^\pi_{0}, 
+\{\frac{1-\beta}{2}, \frac{1-\beta}{2}, \beta\}); \\
+\{r_{\phi_i,\sigma_j}, l_{\phi_i,\sigma_j}, s_{\phi_i,\sigma_j}\} &\sim \PY(d^\pi_{1}, 
+\{r_{0,\sigma_j}, l_{0,\sigma_j}, s_{0,\sigma_j}\}); \\
+z_{t,0} &\sim \{r_{\phi_i, \epsilon}, l_{\phi_i, \epsilon}, 
+s_{\phi_i, \epsilon}\}
+\end{split}
+\end{equation}
+
+Having sampled $\delta$, latent binary state vectors $z_t$ are sampled
+for each time $t$ according to the following process:
+\begin{equation}
+xxx
+\end{equation}
+
+Conditioned on the latent binary state vector $z_t$ for time $t$, we
+draw word $w_t$ according to a hierarchical Pitman-Yor process:
+\begin{equation}
+\begin{split}
+G_{\epsilon} \sim \PY(d^G_{0},H); \quad
+G_z \sim \PY(d^G_{|z|},G_{\gamma(z)}); \quad
+w_t \sim G_{z_t}.
+\end{split}
+\end{equation}
+
+
+%% \input{abstract}
+
+%% \input{introduction}
+%% \input{pdfa}
+
+%% \input{model}
+
+%% %\input{inference}
+
+
+%% %\input{previous_work}
+
+%% \input{results}
+%% \input{theory}
+
+%% \input{discussion}
+
+\newpage
+
+%\subsubsection*{Acknowledgments}
+
+%\subsubsection*{References}
+\begin{small}
+\bibliographystyle{plainnat}
+\bibliography{../../uber} 
+%\input{modrefs}
+\end{small}
+\end{document}
