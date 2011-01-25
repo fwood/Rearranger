@@ -6,9 +6,9 @@ params = getMRFparams();
 I = size(Scores,1); % number of scores
 % setting learning rate parameters
 nu_alpha = .1;
-nu_beta = 1.5;
+nu_beta = .1;
 nu_gamma = .2; 
-nu_delta = 1;
+nu_delta = .1;
 p_new = zeros(1,CDlength+1);
 grad_norms = zeros(1,CDlength);
 alphas = zeros(1,CDlength+1);
@@ -41,10 +41,14 @@ for n=1:CDlength
         M = params.M*ones(1,B);
         M_prime = params.M_prime*ones(1,B);
         den = I*B*V;
-        e_alpha = e_alpha - nu_alpha*params.alpha * sum(sum(S.*M))/den; % divide this by I*B*V
-        e_beta = e_beta - nu_beta*2*params.beta * sum(sum(diff(S, [], 2) .^2))/den;
-        e_gamma = e_gamma - nu_gamma*2*params.gamma * sum(S(:).*S(:))/den;
-        e_delta = e_delta - nu_delta*params.delta * sum(sum(S.*M_prime))/den;
+%         e_alpha = e_alpha - nu_alpha*params.alpha * sum(sum(S.*M))/den; % divide this by I*B*V
+%         e_beta = e_beta - nu_beta*2*params.beta * sum(sum(diff(S, [], 2) .^2))/den;
+%         e_gamma = e_gamma - nu_gamma*2*params.gamma * sum(S(:).*S(:))/den;
+%         e_delta = e_delta - nu_delta*params.delta * sum(sum(S.*M_prime))/den;
+        e_alpha = e_alpha - nu_alpha * sum(sum(S.*M))/den; % divide this by I*B*V
+        e_beta = e_beta - nu_beta * sum(sum(diff(S, [], 2) .^2))/den;
+        e_gamma = e_gamma - nu_gamma * sum(S(:).*S(:))/den;
+        e_delta = e_delta - nu_delta * sum(sum(S.*M_prime))/den;
     end
     expectation_D = [e_alpha, e_beta, e_gamma, e_delta]/I;
     % e_alpha = e_alpha / I;
@@ -65,14 +69,17 @@ for n=1:CDlength
 
         S = MRFSampler(Scores{i,1},params,sweeps); % sample the score        
         
-        e_alpha = e_alpha -nu_alpha*params.alpha * sum(sum(S.*M))/den; % divide each of these by I*B*V, multiply by specific learning rate
-        e_beta = e_beta - nu_beta*2*params.beta * sum(sum(diff(S, [], 2) .^2))/den;
-%         e_b_1 = diff(S(1:end-1), [], 2);
-%         e_b_2 = diff(S(2:end), [], 2);
-%         e_beta = e_beta -2*nu_beta*params.beta * sum(sum(e_b_1))/den + 2*nu_beta*params.beta * sum(sum(e_b_2))/den;
-        e_gamma = e_gamma + 2*nu_gamma*params.gamma * sum(S(:).*S(:))/den;
-        e_delta = e_delta -nu_delta*params.delta * sum(sum(S.*M_prime))/den;
-
+%         e_alpha = e_alpha -nu_alpha*params.alpha * sum(sum(S.*M))/den; % divide each of these by I*B*V, multiply by specific learning rate
+%         e_beta = e_beta - nu_beta*2*params.beta * sum(sum(diff(S, [], 2) .^2))/den;
+% %         e_b_1 = diff(S(1:end-1), [], 2);
+% %         e_b_2 = diff(S(2:end), [], 2);
+% %         e_beta = e_beta -2*nu_beta*params.beta * sum(sum(e_b_1))/den + 2*nu_beta*params.beta * sum(sum(e_b_2))/den;
+%         e_gamma = e_gamma + 2*nu_gamma*params.gamma * sum(S(:).*S(:))/den;
+%         e_delta = e_delta -nu_delta*params.delta * sum(sum(S.*M_prime))/den;
+        e_alpha = e_alpha - nu_alpha * sum(sum(S.*M))/den; % divide this by I*B*V
+        e_beta = e_beta - nu_beta * sum(sum(diff(S, [], 2) .^2))/den;
+        e_gamma = e_gamma - nu_gamma * sum(S(:).*S(:))/den;
+        e_delta = e_delta - nu_delta * sum(sum(S.*M_prime))/den;
     end
 
     expectation_C = [e_alpha, e_beta, e_gamma, e_delta]/I;
