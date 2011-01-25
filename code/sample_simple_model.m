@@ -12,40 +12,62 @@ function [s,d] = sample_simple_model(a,v,nBurn,nSamp,nInter,init)
 d_hyp = 2; % d ~ Gamma(d_hyp,d_hyp)
 
 k = size(v,2); % the number of distinct instruments and notes
-n = size(a,2);
+b = size(a,2);
 
 e = 1e-16*ones(1,size(a,2)); % for now, either sample or integrate out later
 
-params = getMRFparams(n);
+params = getMRFparams();
 
 if nargin < 6
-    s = rand(k,n) < 0.1;
+    s = zeros(k,b);
+    on = ceil(rand(5,b)*k/5) + (k/5*(0:4))'*ones(1,b) + ones(5,1)*(k*((1:b)-1)) ;
+    s(on) = 1;
 else
     s = init;
+    on = reshape(find(init),5,b);
 end
-d = ones(size(s));
-% d = gamrnd(d_hyp,1/d_hyp,[k n]);
-% 
-% for i = 1:20
-%     z = sample_z(a,e,s,v,d);
-%     d = sample_d(z,s,v,d_hyp);
-%     disp(['Initializing D: ' num2str(i)])
-% end
-% curr_score = score(a,s,v,d,d_hyp);
+% d = ones(size(s));
+d = gamrnd(d_hyp,1/d_hyp,[k b]);
+
+% s = ones(size(s));
+for i = 1:20
+    z = sample_z(a,e,s,v,d);
+    d = sample_d(z,s,v,d_hyp);
+    disp(['Initializing D: ' num2str(i)])
+%     subplot(1,3,1); imagesc(d)
+%     subplot(1,3,2); imagesc(z); drawnow
+%     subplot(1,3,3); imagesc(init); drawnow
+end
+% curr_score = score(a,s,v,d,d_hyp,params);
 % scores = curr_score;
 scores = score(a,s,v,d,d_hyp,params);
 
 for t = 1:(nBurn+nSamp*nInter)
-    for i = 1:numel(s)
-        if mod(i,k/5)
-            [s d] = sample_s(a,e,s,v,d,d_hyp,[i i-mod(i,k/5)+k/5],params);
-        end
-        if ~mod(i,k)
-            subplot(1,2,1); imagesc(s([1:48 50:97 99:146 148:195 197:244],:)); title(['Sweep ' num2str(t) ', Entry ' num2str(i) ' of ' num2str(numel(s))]); drawnow
-        end
-    end
+      for i = 1:b
+          for j = 1:5
+              prop = (i-1)*k + (j-1)*(k/5) + ceil(rand*(k/5 - 1));
+              if prop >= on(j,i)
+                  prop = prop + 1;
+              end
+              [s d] = sample_s(a,e,s,v,d,d_hyp,[prop on(j,i)],params);
+              if s(prop) == 1
+                  on(j,i) = prop;
+              end
+          end
+      end
+%     for i = 1:numel(s)
+%         if mod(i,k/5)
+%             [s d] = sample_s(a,e,s,v,d,d_hyp,[i i-mod(i,k/5)+k/5],params);
+%         end
+%         if ~mod(i,k)
+%             subplot(1,2,1); imagesc(s([1:48 50:97 99:146 148:195 197:244],:)); title(['Sweep ' num2str(t) ', Entry ' num2str(i) ' of ' num2str(numel(s))]); drawnow
+%         end
+%     end
     scores = [scores score(a,s,v,d,d_hyp,params)];
-    subplot(1,2,2); plot(scores); 
+    subplot(1,2,1); 
+    imagesc(s([1:48 50:97 99:146 148:195 197:244],:)); 
+    title(['Sweep ' num2str(t) ', Beat ' num2str(i) ' of ' num2str(b)]); 
+    subplot(1,2,2); plot(scores); drawnow
 end
 
 function [s2 d2] = sample_s(a,e,s,v,d,d_hyp,diff,params)
@@ -58,9 +80,17 @@ for j = 1:length(diff)
         [k b] = ind2sub(size(s),diff(j));
         for i = 1:10
             prob = v(:,k)*s2(k,b)*d2(k,b)./(e(b) + v*(s2(:,b).*d2(:,b))); % for all frequencies m, the average fraction of a(m,b) from instrument k
+            mn = sum(floor(a(:,b)).*prob);
+%             if mn > 10
+%                 vr = sum(floor(a(:,b)).*prob.*(1-prob));
+%                 z = sqrt(vr) * randn + mn;
+%             else
+%                 z = poissrnd(mn);
+%             end
             z = sum(binornd(floor(a(:,b)),prob));
             d2(k,b) = gamrnd(d_hyp + z, 1./( d_hyp + s2(k,b)*sum(v(:,k))));
         end
+        pause(1)
     else
         d2(diff(j)) = gamrnd(d_hyp,d_hyp);
     end
