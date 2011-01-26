@@ -1,4 +1,4 @@
-function [PR,t,nn] = make_binary_matrix(Notes,range,red_midi,vel,ts)
+function [PR,t,nn] = make_binary_matrix(Notes,range,m,vel,ts)
 %
 % Inputs:
 %  Notes: A 'notes' matrix as returned from midiInfo.m
@@ -23,8 +23,27 @@ if nargin < 5
 %     tempo = 120;
 %     ts = 60/(tempo*4);
 
-    [tempos, ~] = getTempoChanges(red_midi);
-    ts = tempos(1)/(1000000*8);
+    [tempos, tempos_time] = getTempoChanges(m);
+    if length(tempos)>1
+        for i=1:(length(tempos)-1)
+            if tempos_time(i) == 0
+                tempo = tempos(i);
+                temp_end = tempos_time(i+1);
+            end
+        end
+    else
+        tempo = tempos(1);
+    end
+
+    for i=1:length(m.track(1).messages)
+        if m.track(1).messages(i).type == 88
+            time_sig_den = m.track(1).messages(i).data(2);
+%             disp(time_sig_den);
+        end
+    end
+    ts = tempo/(1000000*4*(4/time_sig_den));
+    % 4*4/i
+
 %     % create temporal flexibility
 %     [tempos, tempos_time] = getTempoChanges(midi);
 %     ts = tempos./(1000000*4); % get 16th note beat lengths

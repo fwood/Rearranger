@@ -1,14 +1,19 @@
 function [params] = CD(Scores,sweeps,CDlength)
-tic;
+% tic;
 
 params = getMRFparams();
 % Scores = cell array of different scores
 I = size(Scores,1); % number of scores
 % setting learning rate parameters
-nu_alpha = .1;
-nu_beta = .1;
-nu_gamma = .2; 
-nu_delta = .1;
+nu_alpha = 2;
+nu_beta = 1;
+nu_gamma = 1;
+nu_delta = 1;
+nu_multiplier = 20;
+nu_alpha = nu_alpha * nu_multiplier;
+nu_beta = nu_beta * nu_multiplier;
+nu_gamma = nu_gamma * nu_multiplier;
+nu_delta = nu_delta * nu_multiplier;
 p_new = zeros(1,CDlength+1);
 grad_norms = zeros(1,CDlength);
 alphas = zeros(1,CDlength+1);
@@ -26,6 +31,8 @@ for i=1:I
     p_new(1) = p_new(1) + logprobS(Scores{i,1},params);
 end
 
+% M = params.M*ones(1,B);
+% M_prime = params.M_prime*ones(1,B);
 
 for n=1:CDlength
     params_new = params;
@@ -38,17 +45,16 @@ for n=1:CDlength
         S = Scores{i,1};
         V = size(S,1); % # of voices
         B = size(S,2); % # of beats    
-        M = params.M*ones(1,B);
-        M_prime = params.M_prime*ones(1,B);
         den = I*B*V;
 %         e_alpha = e_alpha - nu_alpha*params.alpha * sum(sum(S.*M))/den; % divide this by I*B*V
 %         e_beta = e_beta - nu_beta*2*params.beta * sum(sum(diff(S, [], 2) .^2))/den;
 %         e_gamma = e_gamma - nu_gamma*2*params.gamma * sum(S(:).*S(:))/den;
 %         e_delta = e_delta - nu_delta*params.delta * sum(sum(S.*M_prime))/den;
-        e_alpha = e_alpha - nu_alpha * sum(sum(S.*M))/den; % divide this by I*B*V
+%         e_alpha = e_alpha - nu_alpha * sum(sum(S.*M))/den; % divide this by I*B*V
+        e_alpha = e_alpha - nu_alpha * sum(params.M'*S)/den; % divide this by I*B*V
         e_beta = e_beta - nu_beta * sum(sum(diff(S, [], 2) .^2))/den;
-        e_gamma = e_gamma - nu_gamma * sum(S(:).*S(:))/den;
-        e_delta = e_delta - nu_delta * sum(sum(S.*M_prime))/den;
+        e_gamma = e_gamma + nu_gamma * sum(S(:).*S(:))/den;
+%         e_delta = e_delta - nu_delta * sum(params.M_prime'*S)/den;
     end
     expectation_D = [e_alpha, e_beta, e_gamma, e_delta]/I;
     % e_alpha = e_alpha / I;
@@ -64,9 +70,6 @@ for n=1:CDlength
         B = size(Scores{i,1},2); % # of beats
         den = I*B*V;
 
-        M = params.M*ones(1,B);
-        M_prime = params.M_prime*ones(1,B);
-
         S = MRFSampler(Scores{i,1},params,sweeps); % sample the score        
         
 %         e_alpha = e_alpha -nu_alpha*params.alpha * sum(sum(S.*M))/den; % divide each of these by I*B*V, multiply by specific learning rate
@@ -76,10 +79,11 @@ for n=1:CDlength
 % %         e_beta = e_beta -2*nu_beta*params.beta * sum(sum(e_b_1))/den + 2*nu_beta*params.beta * sum(sum(e_b_2))/den;
 %         e_gamma = e_gamma + 2*nu_gamma*params.gamma * sum(S(:).*S(:))/den;
 %         e_delta = e_delta -nu_delta*params.delta * sum(sum(S.*M_prime))/den;
-        e_alpha = e_alpha - nu_alpha * sum(sum(S.*M))/den; % divide this by I*B*V
+%         e_alpha = e_alpha - nu_alpha * sum(sum(S.*M))/den; % divide this by I*B*V
+        e_alpha = e_alpha - nu_alpha * sum(params.M'*S)/den; % divide this by I*B*V
         e_beta = e_beta - nu_beta * sum(sum(diff(S, [], 2) .^2))/den;
-        e_gamma = e_gamma - nu_gamma * sum(S(:).*S(:))/den;
-        e_delta = e_delta - nu_delta * sum(sum(S.*M_prime))/den;
+        e_gamma = e_gamma + nu_gamma * sum(S(:).*S(:))/den;
+%         e_delta = e_delta - nu_delta * sum(params.M_prime'*S)/den;
     end
 
     expectation_C = [e_alpha, e_beta, e_gamma, e_delta]/I;
@@ -108,7 +112,7 @@ for n=1:CDlength
     title('joint logprobS');
     subplot(2,3,2);
     plot(grad_norms(1:n));
-    title('magnitude of gradient');
+    title('norm(gradient)');
     subplot(2,3,3);
     plot(alphas(1:n+1));
     title('alpha');
@@ -126,7 +130,7 @@ for n=1:CDlength
     if mod(n,100) == 0
         disp(params);
     end
-toc;
+% toc;
     
 end
 

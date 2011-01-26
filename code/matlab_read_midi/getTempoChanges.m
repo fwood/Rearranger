@@ -9,6 +9,9 @@ function [tempos,tempos_time]=getTempoChanges(midi)
 % should tempo changes effect across tracks? across channels?
 %
 
+% Copyright (c) 2009 Ken Schutte
+% more info at: http://www.kenschutte.com/midi
+
 tempos = [];
 tempos_time = [];
 for i=1:length(midi.track)

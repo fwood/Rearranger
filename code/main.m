@@ -15,12 +15,13 @@ A = abs(spectrogram(fatBottomedGirls(1*ns:3*ns),winsize));
 %set(gca,'YDir','normal')
 
 %% reconstruct the sound source from the spectrogram
-recon =  []; zeros(1,5*ns);
+% recon =  []; zeros(1,5*ns);
+recon = zeros(1,size(A,2)*size(A,1)*2);
 for t = 1:size(A,2)
     rphase = exp(1i*2*pi*rand(size(A, 1), 1));
     %recon((t-1)*winsize+(1:winsize)) = ifft([A(:,t); A(end-1:-1:2,t)])';
     R = real(ifft([A(:,t) .* rphase; A(end-1:-1:2,t) .* conj(rphase(end-1:-1:2))])');
-    recon = [recon R(1:(end/2))];
+    recon((t-1)*length(R)/2+1:t*length(R)/2) = R(1:(end/2));
 end
 
 soundsc(recon,ns)

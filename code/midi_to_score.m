@@ -1,29 +1,34 @@
+% Read a midi file into a score
+% Alex Kass, January 2011
+
 % one specific midi file example, needs to be expanded to whole directory
 % midi = midiInfo(readmidi('beethoven-ludwig-van-fuge-opus-137-5630.midi'));
 % parts = unique(midi(:,1));  % break midi file into parts
 
-
-midi_files = dir('../midi/quintets/*ppets.mid');
+midi_files = dir('../midi/quintets/*tchai*.mid*');
+% midi_files = dir('../midi/quintets/Weber-quintet1.mid*');
+% midi_files = dir('../midi/quintets/*muppets*.mid*');
 % dir('../midi/quintets/muppets.mid')
 
 load ../data/brassQuintetFeatures.mat;
+samples_to_spectra;
 % samps = brassQuintetFeatures;
-
 % tempo = 120; % arbitrary bpm set
 % sixteenth = 60 / (tempo*4);
+% sixteenth = 300000/(4*1000000);
 
-sixteenth = 300000/(4*1000000);
 
 
-for i = 1:length(midi_files)
+for index = 1:length(midi_files)
     clear SCORE;
-    filename = strcat('../midi/quintets/',midi_files(i).name);
+    filename = strcat('../midi/quintets/',midi_files(index).name);
     m = readmidi(filename);
+    
     midi = sortrows(midiInfo(m),1);
     %time = linspace(min(midi(:,5)),max(midi(:,6)));
     %time = sort(unique([midi(:,5);midi(:,6)]));
     %time = sort(unique(midi(:,5)));
-    time = 0:sixteenth:max(midi(:,6));
+    %time = 0:sixteenth:max(midi(:,6));
     parts = sort(unique(midi(:,1)));
     div = 1;
     % if the midi file contains instruments on different channels, as opposed
@@ -102,18 +107,19 @@ for i = 1:length(midi_files)
     % append appropriate note ranges for each subscore, create binary
     % matrices for each subscore
     for n=1:length(SCORE)
-        if find(means(1)==mean(SCORE{n,1}(:,3)));
+        if find(sorted_means(1)==mean(SCORE{n,1}(:,3)));
             SCORE{n,2}=notes_1;
-        elseif find(means(2)==mean(SCORE{n,1}(:,3)));
+        elseif find(sorted_means(2)==mean(SCORE{n,1}(:,3)));
             SCORE{n,2}=notes_2;
-        elseif find(means(3)==mean(SCORE{n,1}(:,3)));
+        elseif find(sorted_means(3)==mean(SCORE{n,1}(:,3)));
             SCORE{n,2}=notes_3;
-        elseif find(means(4)==mean(SCORE{n,1}(:,3)));
+        elseif find(sorted_means(4)==mean(SCORE{n,1}(:,3)));
             SCORE{n,2}=notes_4;
-        elseif find(means(5)==mean(SCORE{n,1}(:,3)));
+        elseif find(sorted_means(5)==mean(SCORE{n,1}(:,3)));
             SCORE{n,2}=notes_5;
         end
         [bm,t,nn] = make_binary_matrix(SCORE{n,1},SCORE{n,2},m);
+        % if no notes are on at a given time point, turn into a rest
         for time_point=1:length(bm)
             if sum(bm(:,time_point)) == 0
                 bm(end,time_point) = 1;
@@ -144,16 +150,27 @@ for i = 1:length(midi_files)
 %     
 %     for n=1:length(WHOLE_SCORE)
 
-    imagesc(WHOLE_SCORE);
+    [M, M_prime] = A2M(WHOLE_SCORE);
+
+    figure();
+    imagesc(WHOLE_SCORE(:,1:end));
+%     imagesc(WHOLE_SCORE);
     title('Midi Score in 5 parts');
-    xlabel('Time Domain, in 16th notes at 120 BPM');
-    ylabel('Notes');
+%     xlabel('Time Domain, in beats');
+%     ylabel('Notes');
+    xlabel('B (beats)');
+    ylabel('V (voices/notes)');
     
     ns = 48000;
     
-    samples_to_spectra
     A = V*WHOLE_SCORE;
-    save(strcat(filename,'_spec'),A);
+    a = '../data/';
+    b = midi_files(index).name;
+    c = '_spec.mat';
+    d = '_groundtruth.mat';
+    save([a,b,c],'A');
+    save([a,b,d],'WHOLE_SCORE');
+
     %A = abs(spectrogram(WHOLE_SCORE(1*ns:2*ns),winsize));
     
     recon =  []; zeros(1,5*ns);    
@@ -163,13 +180,26 @@ for i = 1:length(midi_files)
         R = real(ifft([A(:,t) .* rphase; A(end-1:-1:2,t) .* conj(rphase(end-1:-1:2))])');
         recon = [recon R(1:(end/2))];
     end
-    
-    
-
+        
     soundsc(recon,ns);
 
 end
-%     tic;    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%     tic;
 %     
 %     for n = 1:20 %length(midi) % loop through full midi-file data
 %         disp(n);
@@ -236,5 +266,3 @@ end
 %     for k = 1:length(parts)
 %         strcat('part_',int2str(k)) = [];
 %     end
-
-% break midi file into vectors of notes over time, per track/channel
