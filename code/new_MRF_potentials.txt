@@ -1,9 +1,10 @@
-huge potentials for other notes in same instrument
-245x245 matrix(each note with another note simultaneously)
+Description of new parameters, including HARMONY, INTRA_PART NOTE MOVEMENT, VOICE LEADING.
 
 
 HARMONY:
-steps along scale
+245x245 matrix(each note with another note simultaneously)
+
+steps along scale (not dependent on where in overall note range, just where on octave-length scale):
 0 (unison): 0
 1: .9	(m2)
 2: .8	(M2)
