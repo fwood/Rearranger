@@ -20,7 +20,7 @@ params.m6 = 1;
 params.M6 = 1;
 params.m7 = 1;
 params.M7 = 1;
-
+params.note_movements = ones(95,1);
 
 K = 5; % instrument / voice
 N = 12*4+1; % notes (+1 for rest)
