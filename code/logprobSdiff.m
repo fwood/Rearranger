@@ -73,7 +73,28 @@ s_beta = s_beta - beta*(sum((S_new(forward_inds+size(S, 1)) - S_new(forward_inds
 s_gamma = gamma*((sum(S(inds)==0)) - sum(S(inds)==1));
 % s_gamma = gamma*(sum((params.M_bin(R)'.*S(inds))) - sum((params.M_bin(R)'.*(1-S(inds)))));
 s_delta = delta*(sum((params.M_prime(R)'.*(1-S(inds))) - sum(params.M_prime(R)'.*S(inds))));
+%% calculate difference scores for harmony parameters
+% first remove all rest "on"s from score
+intervals_1 = harmony(S);
+S_new = S;
+S_new(inds) = 1-S(inds);
+intervals_2 = harmony(S_new);
+s_U = U*(sum(intervals_2(1,:)) - sum(intervals_1(1,:)));
+s_m2 = m2*(sum(intervals_2(2,:)) - sum(intervals_1(2,:)));
+s_M2 = m2*(sum(intervals_2(3,:)) - sum(intervals_1(3,:)));
+s_m3 = m2*(sum(intervals_2(4,:)) - sum(intervals_1(4,:)));
+s_M3 = m2*(sum(intervals_2(5,:)) - sum(intervals_1(5,:)));
+s_P4 = m2*(sum(intervals_2(6,:)) - sum(intervals_1(6,:)));
+s_TT = m2*(sum(intervals_2(7,:)) - sum(intervals_1(7,:)));
+s_P5 = m2*(sum(intervals_2(8,:)) - sum(intervals_1(8,:)));
+s_m6 = m2*(sum(intervals_2(9,:)) - sum(intervals_1(9,:)));
+s_M6 = m2*(sum(intervals_2(10,:)) - sum(intervals_1(10,:)));
+s_m7 = m2*(sum(intervals_2(11,:)) - sum(intervals_1(11,:)));
+s_M7 = m2*(sum(intervals_2(12,:)) - sum(intervals_1(12,:)));
 
-d = s_alpha + s_beta + s_gamma + s_delta;
+
+%%
+d = s_alpha + s_beta + s_gamma + s_delta + s_U + s_m2 + s_M2 + s_m3 + s_M3 ...
+    + s_P4 + s_TT + s_P5 + s_m6 + s_M6 + s_m7 + s_M7;
 end
 

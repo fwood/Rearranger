@@ -8,6 +8,19 @@ params.alpha = 4;
 params.beta = 2.5;
 params.gamma = -0.5;
 params.delta = 0;
+params.U = 1;
+params.m2 = 1;
+params.M2 = 1;
+params.m3 = 1;
+params.M3 = 1;
+params.P4 = 1;
+params.TT = 1;
+params.P5 = 1;
+params.m6 = 1;
+params.M6 = 1;
+params.m7 = 1;
+params.M7 = 1;
+
 
 K = 5; % instrument / voice
 N = 12*4+1; % notes (+1 for rest)
