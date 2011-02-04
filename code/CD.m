@@ -9,11 +9,16 @@ nu_alpha = 2;
 nu_beta = 1;
 nu_gamma = 1;
 nu_delta = 1;
+nu_harms = ones(12,1)*.1;
+nu_NM = ones(95,1)*.01;
 nu_multiplier = 20;
 nu_alpha = nu_alpha * nu_multiplier;
 nu_beta = nu_beta * nu_multiplier;
 nu_gamma = nu_gamma * nu_multiplier;
 nu_delta = nu_delta * nu_multiplier;
+nu_harms = nu_harms * nu_multiplier;
+nu_NM = nu_NM * nu_multiplier;
+
 p_new = zeros(1,CDlength+1);
 grad_norms = zeros(1,CDlength);
 alphas = zeros(1,CDlength+1);
@@ -24,7 +29,14 @@ gammas = zeros(1,CDlength+1);
 gammas(1) = params.gamma;
 deltas = zeros(1,CDlength+1);
 deltas(1) = params.delta;
-
+harms = zeros(12,CDlength+1);
+harms(1,1) = params.harms(1); % unison (desirable consonance)
+harms(5,1) = params.harms(5); % major 3rd (desirable consonance)
+harms(7,1) = params.harms(7); % tri-tone (undesirable dissonance)
+note_movements = zeros(95,CDlength+1);
+note_movements(48,1) = params.jumps(48); % note stays the same
+note_movements(47,1) = params.jumps(47); % note drops 1/2 step
+note_movements(56,1) = params.jumps(56); % note jumps a perfect 5th
 
 
 for i=1:I
@@ -40,6 +52,8 @@ for n=1:CDlength
     e_beta = 0;
     e_gamma = 0;
     e_delta = 0;
+    e_harms = zeros(12,1);
+    e_NM = zeros(95,1);
     % original score data expectation section of gradient
     for i=1:I
         S = Scores{i,1};
@@ -55,8 +69,20 @@ for n=1:CDlength
         e_beta = e_beta - nu_beta * sum(sum(diff(S, [], 2) .^2))/den;
         e_gamma = e_gamma + nu_gamma * sum(S(:).*S(:))/den;
 %         e_delta = e_delta - nu_delta * sum(params.M_prime'*S)/den;
+
+        intervals = harmony(S);
+        sum_intervals = zeros(12,1);
+        for j=1:12
+            sum_intervals(j) = sum(intervals(j,:));
+        end
+        e_harms = e_harms - nu_harms .* sum_intervals/(I*B);
+
+        jumps = note_movement(S);
+        e_NM = e_NM - nu_NM .* jumps/I;
+        
+        % vectors for harm and note_movement params
     end
-    expectation_D = [e_alpha, e_beta, e_gamma, e_delta]/I;
+    expectation_D = [e_alpha, e_beta, e_gamma, e_delta, e_harms', e_NM']/I;
     % e_alpha = e_alpha / I;
 
 
@@ -64,6 +90,8 @@ for n=1:CDlength
     e_beta = 0;
     e_gamma = 0;
     e_delta = 0;
+    e_harms = zeros(12,1);
+    e_NM = zeros(95,1);
     % sampled score expectation section of gradient
     for i=1:I % iterate through each score
         V = size(Scores{i,1},1); % # of voices
@@ -84,9 +112,21 @@ for n=1:CDlength
         e_beta = e_beta - nu_beta * sum(sum(diff(S, [], 2) .^2))/den;
         e_gamma = e_gamma + nu_gamma * sum(S(:).*S(:))/den;
 %         e_delta = e_delta - nu_delta * sum(params.M_prime'*S)/den;
+        
+        intervals = harmony(S);
+        sum_intervals = zeros(12,1);
+        for j=1:12
+            sum_intervals(j) = sum(intervals(j,:));
+        end
+        e_harms = e_harms - nu_harms .* sum_intervals/(I*B);
+
+        jumps = note_movement(S);
+        e_NM = e_NM - nu_NM .* jumps/I;
+        
+        % vectors for harm and note_movement params    
     end
 
-    expectation_C = [e_alpha, e_beta, e_gamma, e_delta]/I;
+    expectation_C = [e_alpha, e_beta, e_gamma, e_delta, e_harms', e_NM']/I;
 
     grad = expectation_D - expectation_C;
     grad_norms(n) = norm(grad);
@@ -99,7 +139,10 @@ for n=1:CDlength
     gammas(n+1) = params_new.gamma;
     params_new.delta = params.delta + grad(4)*nu_delta;
     deltas(n+1) = params_new.delta;
-
+    params_new.harms = params.harms + grad(5:16)' .* nu_harms;
+    harms(:,n+1) = params_new.harms;
+    params_new.jumps = params.jumps + grad(17:end)' .* nu_NM;
+    note_movements(:,n+1) = params_new.jumps;
     
     for i=1:I
         p_new(n+1) = p_new(n+1) + logprobS(Scores{i,1},params_new);
@@ -107,24 +150,42 @@ for n=1:CDlength
     
     params = params_new;
     
-    subplot(2,3,1);
+    subplot(2,5,1);
     plot(p_new(1:n+1));
     title('joint logprobS');
-    subplot(2,3,2);
+    subplot(2,5,2);
     plot(grad_norms(1:n));
     title('norm(gradient)');
-    subplot(2,3,3);
+    subplot(2,5,3);
     plot(alphas(1:n+1));
     title('alpha');
-    subplot(2,3,4);
+    subplot(2,5,4);
     plot(betas(1:n+1));
     title('beta');
-    subplot(2,3,5);
-    plot(gammas(1:n+1));
-    title('gamma');
-    subplot(2,3,6);
-    plot(deltas(1:n+1));
-    title('delta');
+%     subplot(3,3,5);
+%     plot(gammas(1:n+1));
+%     title('gamma');
+%     subplot(4,3,6);
+%     plot(deltas(1:n+1));
+%     title('delta');
+    subplot(2,5,5);
+    plot(harms(1,1:n+1));
+    title('harmony: unison');
+    subplot(2,5,6);
+    plot(harms(5,1:n+1));
+    title('harmony: M3');
+    subplot(2,5,7);
+    plot(harms(7,1:n+1));
+    title('harmony: TriTone');
+    subplot(2,5,8);
+    plot(note_movements(48,1:n+1));
+    title('note movement: stay same');
+    subplot(2,5,9);
+    plot(note_movements(47,1:n+1));
+    title('note movement: down a 1/2 step');
+    subplot(2,5,10);
+    plot(note_movements(56,1:n+1));
+    title('note movement: up a perfect fifth');
     drawnow;
     
     if mod(n,100) == 0

@@ -24,21 +24,35 @@ s4 = -params.delta * sum(sum(S.*M_prime));
 
 intervals = harmony(S);
 % each harmonic interval within an octave range generates a score
-s5 = -params.U * sum(intervals(1,:));
-s6 = -params.m2 * sum(intervals(2,:));
-s7 = -params.M2 * sum(intervals(3,:));
-s8 = -params.m3 * sum(intervals(4,:));
-s9 = -params.M3 * sum(intervals(5,:));
-s10 = -params.P4 * sum(intervals(6,:));
-s11 = -params.TT * sum(intervals(7,:));
-s12 = -params.P5 * sum(intervals(8,:));
-s13 = -params.m6 * sum(intervals(9,:));
-s14 = -params.M6 * sum(intervals(10,:));
-s15 = -params.m7 * sum(intervals(11,:));
-s16 = -params.M7 * sum(intervals(12,:));
+sum_intervals = zeros(12,1);
+for i=1:12
+    sum_intervals(i) = sum(intervals(i,:));
+end
+harms = params.harms; % call harmony parameter vector
+
+s5 = sum(-harms .* sum_intervals);
+
+% s5 = -params.U * sum(intervals(1,:));
+% s6 = -params.m2 * sum(intervals(2,:));
+% s7 = -params.M2 * sum(intervals(3,:));
+% s8 = -params.m3 * sum(intervals(4,:));
+% s9 = -params.M3 * sum(intervals(5,:));
+% s10 = -params.P4 * sum(intervals(6,:));
+% s11 = -params.TT * sum(intervals(7,:));
+% s12 = -params.P5 * sum(intervals(8,:));
+% s13 = -params.m6 * sum(intervals(9,:));
+% s14 = -params.M6 * sum(intervals(10,:));
+% s15 = -params.m7 * sum(intervals(11,:));
+% s16 = -params.M7 * sum(intervals(12,:));
+
+%sum(intervals*params.harms)
+%% Calculate cumulative score for note_movement parameters
+
+jumps = note_movement(S);
+s6 = sum(-params.jumps .* jumps);
 
 %%
-p = (s1+s2+s3+s4+s5+s6+s7+s8+s9+s10+s11+s12+s13+s14+s15+s16);
+p = (s1+s2+s3+s4+s5+s6);
 % p = s3;
 end
 

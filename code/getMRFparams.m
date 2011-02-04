@@ -8,19 +8,20 @@ params.alpha = 4;
 params.beta = 2.5;
 params.gamma = -0.5;
 params.delta = 0;
-params.U = 1;
-params.m2 = 1;
-params.M2 = 1;
-params.m3 = 1;
-params.M3 = 1;
-params.P4 = 1;
-params.TT = 1;
-params.P5 = 1;
-params.m6 = 1;
-params.M6 = 1;
-params.m7 = 1;
-params.M7 = 1;
-params.note_movements = ones(95,1);
+% params.U = 1;
+% params.m2 = 1;
+% params.M2 = 1;
+% params.m3 = 1;
+% params.M3 = 1;
+% params.P4 = 1;
+% params.TT = 1;
+% params.P5 = 1;
+% params.m6 = 1;
+% params.M6 = 1;
+% params.m7 = 1;
+% params.M7 = 1;
+params.harms = ones(12,1);
+params.jumps = ones(95,1);
 
 K = 5; % instrument / voice
 N = 12*4+1; % notes (+1 for rest)
@@ -44,16 +45,3 @@ for i=1:size(midNotePotential,1)
 end
 
 end
-
-% % params.epsilon = 1;
-% % params.omicron = 1;
-% o = diag(ones(1,49));
-% for i=1:49
-%     o = o + diag(ones(1,i),49-i)*(i/49) + diag(ones(1,i),-(49-i))*(i/49);
-%     if 
-%         
-%     end
-%     o(end,1:end-1) = ones(1,1:end-1)*.5;
-%     o(1:end-1,end) = ones(1:end-1,1)*.5;
-%     o(end) = .5;
-% end

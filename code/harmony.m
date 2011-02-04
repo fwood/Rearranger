@@ -1,5 +1,5 @@
 function [intervals] = harmony(S)
-% returns a 12xB matrix of harmonic interval frequencies from a score S
+% returns a 12 x B matrix of harmonic interval frequencies from a score S
 [~,B] = size(S);
 
 part1 = S(1:49,:);
