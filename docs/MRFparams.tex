@@ -3,6 +3,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{array}
+\usepackage{subfigure}
 \title{Estimating Markov Random Field Parameters for the model prior}
 \author{Alex Kass}
 \date{3/20/2011}
@@ -47,20 +48,19 @@ When choosing the nature of the parameters of our Markov Random Field, we want t
 
 As intimated in the first section, to calculate the joint probability of the parameter space, we multiply all clique potentials together while normalizing by a partition function $Z\left(\Theta\right)$.  By taking the $\log$ of both sides of the equation, we can ease computation by simply adding the individual parameter components together within the exponential term on the right side.  Here, we calculate the derivative of the log of the joint probability for Score $k$ with respect to the parameter space $\Theta$, where $\varkappa$ and $\lambda$ are 12x1 and 95x1 parameter vectors, respectively:
 
-%\begin{eqnarray}
-\[\frac{\partial}{\partial\Theta}\log{\Prob\left(S_k|\Theta\right)} &=& 
-\log{\frac{1}{Z\left(\Theta\right)}\exp\{-\alpha\sum_v\sum_b{S_{vb}M_{vb}}\]
-\[- \beta\sum_v\sum_b{(S_{vb}-S_{v,b-1})^2} - \varkappa\sum_{b}{H_b} - \lambda({J})\}}\]
-%\end{eqnarray}
+\begin{eqnarray*}
+\lefteqn{\frac{\partial}{\partial\Theta}\log{\Pr\left(S_k|\Theta\right)}}  \\
+&=& \log{\frac{1}{Z\left(\Theta\right)}\exp\{-\alpha\sum_v\sum_b{S_{vb}M_{vb}}- \beta\sum_v\sum_b{(S_{vb}-S_{v,b-1})^2} - \varkappa\sum_{b}{H_b} - \lambda({J})\}}
+\end{eqnarray*}
 
 
 Each 12x1 vector $H^b$ is an aggregate total of harmonic intervals (normalized to fall within a single octave and indexed by $int$) at a specific beat $b$.  It determines all possible pairwise interval combinations from the five notes (${5\choose2}$=10) that are on at a given time step.  $\zeta_i^b$ represents the linear index of the note that is "on" at time $b$ in instrument part $i$:
 
-\[H_{int}^b = \sum_{i=1}^4\sum_{j=i+1}^5\matbbm{1}\left(\left|\zeta_i^b-\zeta_j^b\right|\bmod{12} = int\right)\]
+\[H_{int}^b = \sum_{i=1}^4\sum_{j=i+1}^5\mathbb{1}\left(\left|\zeta_i^b-\zeta_j^b\right|\bmod{12} = int\right)\]
 
 As seen above, the $\lambda$ parameter (this being a 95x1 vector) is multiplied by $J$, which itself is a vector of the sums of each of the 95 interval jumps (here indexed as $int$), tabulated within each of the five instruments ($i$) throughout the duration of the score.  Thus, $\zeta_{b,i}$ holds similar information as the preceding equation:
 
-\[J_{int} = \sum_{b=2}^{B}\sum_{i=1}^5\matbbm{1}\left(\left|\zeta_{b,i}-\zeta_{b-1,i}\right| = int\right)\]
+\[J_{int} = \sum_{b=2}^{B}\sum_{i=1}^5\mathbb{1}\left(\left|\zeta_{b,i}-\zeta_{b-1,i}\right| = int\right)\]
 
 \section{Prototype MIDI Score matrices as parameter training}
 
