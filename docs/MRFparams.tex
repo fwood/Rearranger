@@ -3,7 +3,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{array}
-%\usepackage{subfigure}
+\usepackage{subfigure}
 \parskip 7.2pt
 \title{Estimating Markov Random Field Parameters for the model prior}
 \author{Alex Kass}
@@ -180,6 +180,23 @@ We can demonstrate the effect of our learned parameters by generating a random s
 }
 \centering
 \caption{Comparison of Randomly Generated Score and this same Score after sampling}
+\label{fig-all}
+\end{figure}
+
+\begin{figure}
+\centering
+\mbox{
+\subfigure{
+\includegraphics[width=.5\textwidth]{figures/Score(Weber-Original).pdf}
+\label{fig-8}
+}\quad
+\subfigure{
+\includegraphics[width=.5\textwidth]{figures/Score(Weber-Sampled).pdf}
+\label{fig-9}
+}
+}
+\centering
+\caption{Comparison of one actual score and this same score after sampling}
 \label{fig-all}
 \end{figure}
 
