@@ -4,6 +4,7 @@
 \usepackage{amssymb}
 \usepackage{array}
 \usepackage{subfigure}
+\usepackage{epstopdf}
 \parskip 7.2pt
 \title{Estimating Markov Random Field Parameters for the model prior}
 \author{Alex Kass}
@@ -87,9 +88,14 @@ To calculate the joint probability of the score $S$, we multiply together all cl
 \[\psi_\gamma = \exp\{-\gamma^\mathrm{T}{\bf H}\}\]
 \[\psi_{\bf \lambda} = \exp\{-\lambda^\mathrm{T}{\bf J}\}\]
 
-\[{\bf H} = \sum_{b=1}^B\sum_{i=1}^4\sum_{j=i+1}^5\left(\left|\zeta_{b,i}-\zeta_{b,j}\right|\bmod{12}\in\{U,m2,M2,\cdots,m7,M7\}\right)\]
+\[{\bf H} = \{h_0,h_1,h_2,h_3,h_4,h_5,h_6,h_7,h_8,h_9,h_{10},h_{11}\}\]
 
-\[{\bf J} = \sum_{b=2}^B\sum_{i=1}^5\left(\left(\zeta_{b,i}-\zeta_{b-1,i}\right)\in\{-47,-46,\cdots,-1,0,1,\cdots,46,47\}\right)\]
+\[h_x = \sum_{b=1}^B\sum_{i=1}^4\sum_{j=i+1}^5\left(\left|\zeta_{b,i}-\zeta_{b,j}\right|\bmod{12} = x\right)\]
+%\in\{U,m2,M2,\cdots,m7,M7\}\right)\]
+
+\[{\bf J} = \{j_{-47},j_{-46},\cdots,j_{-1},j_0,j_1,\cdots,j_{46},j_{47}\}\]
+
+\[j_y = \sum_{b=2}^B\sum_{i=1}^5\left(\zeta_{b,i}-\zeta_{b-1,i} = y\right)\]
 
 $\zeta_{b,i}$ represents the linear index of the note that is "on" at time $b$ in instrument part $i$.
 
@@ -140,26 +146,26 @@ Contrastive divergence allows us to approximate the gradient for the parameters 
 Once the parameters have been estimated to the point of convergence, we set them as the prior and proceed to subsequent signal processing.  Figure 2 shows the convergence of the $\beta$ and "M3," or "major 3rd" component of the $\gamma$ harmonic interval vector over 40,000 iterations of sampling.  We measured convergence based on the asymptotic movement of the joint log likelihood and norm of the gradient.
 
 \begin{figure}
-\centering
+%\centering
 \mbox{
 \subfigure{
-\includegraphics[width=.25\textwidth]{figures/alpha.pdf}
+\includegraphics[width=.25\textwidth]{figures/alpha.eps}
 \label{fig-2}
 }\quad
 \subfigure{
-\includegraphics[width=.25\textwidth]{figures/beta.pdf}
+\includegraphics[width=.25\textwidth]{figures/beta.eps}
 \label{fig-3}
 }\quad
 \subfigure{
-\includegraphics[width=.25\textwidth]{figures/harmony(M3).pdf}
+\includegraphics[width=.25\textwidth]{figures/harmonyM3.eps}
 \label{fig-4}
 }\quad
 \subfigure{
-\includegraphics[width=.25\textwidth]{figures/note_movement(downhalfstep).pdf}
+\includegraphics[width=.25\textwidth]{figures/notemovementdownhalfstep.eps}
 \label{fig-5}
 }
 }
-\centering
+%\centering
 \caption{Convergence of $\alpha$, $\beta$, $\gamma$ (Major 3rd interval), and $\lambda$ (down 1/2 step) parameters over 40,000 sampler iterations using 3 Contrastive Divergence sweeps per sample.}
 \label{fig-all}
 \end{figure}
