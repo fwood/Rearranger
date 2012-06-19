@@ -1,0 +1,10 @@
+Trumpets - Instrument range is E3-E6.
+French Horns - Instrument range is F2-F5.
+Trombones - Instrument range is C2-E5.
+Tuba - Instrument range is C1-E4.
+
+
+C1-C5 = 24-72
+c2-C6 = 36-84
+C2-C6 = 36-84
+C3-C7 = 48-96

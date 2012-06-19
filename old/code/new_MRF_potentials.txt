@@ -1,0 +1,77 @@
+Description of new parameters, including HARMONY, INTRA_PART NOTE MOVEMENT, VOICE LEADING.
+
+
+HARMONY:
+245x245 matrix(each note with another note simultaneously)
+
+steps along scale (not dependent on where in overall note range, just where on octave-length scale):
+0 (unison): 0
+1: .9	(m2)
+2: .8	(M2)
+3: .3	(m3)
+4: .2	(M3)
+5: .5	(P4)
+6: .9	(tritone)
+7: .2	(P5)
+8: .5	(m6)
+9: .5	(M6)
+10: .6	(m7)
+11: .7	(M7)
+
+rest: .5
+
+part1 = S(1:49,:);
+depending on the note in part 1, the notes in part 2 should have specific potentials, i.e. all notes should be lower in pitch than in part 1.  (not as applicable in other parts, given the difference in instruments)
+
+e.g. if note = note 5 (in scale range, that's 5th from top);
+--> note in part 2 must be between 5th and lowest note, with a constant on the rest.  lowest potentials are at octaves and consonant intervals (e.g. thirds and fifths), higher potentials at dissonant ones (e.g. minor seconds, major sevenths, tritone);
+
+part2 = S(50:98,:);
+part3 = S(99:147,:);
+part4 = S(148:196,:);
+part5 = S(197:245,:);
+
+
+INTRA_PART NOTE MOVEMENT
+(each note and note before it)
+5 49x49 matrices
+(probability of jumping from one note to another)
+
+if rest & rest before, equal probability of going anywhere
+if rest & note before, emphasis on proximity to previously voiced note
+if note, (slightly heavier) emphasis on proximity to previous note
+
+for each part:
+(without having increased potentials for tritones/other dissonances)
+
+this is one part's potential matrix
+o = diag(ones(1,49));
+for i=1:49
+    o = o + diag(ones(1,i),49-i)*(i/49) + diag(ones(1,i),-(49-i))*(i/49);
+    o(end,1:end-1) = ones(1,1:end-1)*.5;
+    o(1:end-1,end) = ones(1:end-1,1)*.5;
+    o(end) = .5;
+    o = 1-o;
+end
+
+
+VOICE LEADING (MOVEMENT AMONG MULTIPLE PARTS)
+(looking at how multiple instruments jump, parallel fifths)
+if notes are fifth (or fourth) apart (five or seven half-steps), they cannot jump the same distance in the same direction
+
+parallel fifths: .9
+parallel fourths: .8
+parallel octaves: .75
+parallel thirds: .3
+
+landing on/resolving to same note/octave (from different notes): .2
+
+
+
+PITCH SPACING (AMONG MULTIPLE PARTS)
+as mentioned before,
+
+for first two parts (trumpet I & II), first part note should always be higher or equal.
+
+not as important in lower three parts, as each instrument has different range.
+
